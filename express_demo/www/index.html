@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		table{
+			border-collapse:collapse;
+		}
+		td,th{
+		border:1px solid #333;
+		width: 60px;
+		}
+		button{
+			width: 100%;
+			height: 100%;
+		}
+		#btn{
+			width: 100px;
+		}
+	</style>
+</head>
+<body>
+	<h1>首页</h1>
+	<p>
+		新同学学号:
+		<input type="text" id="idTxt">
+	</p>
+	<p>
+		新同学姓名:
+		<input type="text" id="nameTxt">
+	</p>
+	<p>
+		<button id="btn">插入新同学</button>
+	</p>
+	<hr>
+	<table id="table">
+		<thead>
+			<tr>
+				<th>学号</th>
+				<th>姓名</th>
+				<th>编辑</th>
+			</tr>
+		</thead>
+	</table>
+	<script type="text/javascript" src="jquery-3.3.1.min.js"></script>
+	<script type="text/javascript">
+		var tbody=document.createElement("tbody");
+				table.appendChild(tbody);
+		//获取服务器数据get
+			get();
+		//向服务器增加数据post
+			$("#btn").click(function(){
+				var id=$("#idTxt").val();
+				var name=$("#nameTxt").val();
+				console.log(id,name);
+				$.post("/student",{
+					id:id,
+					name:name
+				},function(){
+					console.log(1)
+					get();
+				})
+			});
+		//向服务器删除数据delete
+			$("tbody").delegate(".butn","click",function(){
+				var id=$(this).data("id");
+				$.ajax({
+					url:"/student",
+					type:"DELETE",
+					data:{
+						id:id
+					},
+					success:function(){
+						get();
+					}
+				});
+			});
+		//向服务器更改数据patch
+			$("tbody").delegate(".gbutn","click",function(){
+				var id=$(this).data("id");
+				var name=$(this).parent().prev().children().val();
+				$.ajax({
+					url:"/student",
+					type:"PATCH",
+					data:{
+						id:id,
+						name:name
+					},
+					success:function(){
+						get();
+					}
+				})
+			})
+		//封装更新数据函数
+		function get(){
+			$.get("/student",function(data){
+			var str="";
+			for(var i=0;i<data.length;i++){
+				str+="<tr><td>"+data[i].id+"</td><td>"+data[i].name+"</td><td><button class='butn' data-id="+data[i].id+">删除</button></td><td><input type='text'/></td><td><button class='gbutn' data-id="+data[i].id+">更改名字</button></td></tr>"
+			}
+			tbody.innerHTML=str;
+		});
+		}
+	</script>
+</body>
+</html>
